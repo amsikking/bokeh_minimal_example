@@ -10,8 +10,8 @@ Download the repository and either:
 
 ## Details:
 This example shows:
-- How to launch Bokeh directly a Python script AND from the command line.
-- A minimal Bokeh visualization with a button and an updating plot (via periodic callback).
+- How to launch Bokeh directly from a Python script AND from the command line.
+- A minimal Bokeh visualization with an updating plot (via periodic callback) and a button.
 - A way of stopping the Bokeh server with a button.
 - A way of stopping the Bokeh server when the user exits the web browser.
 
