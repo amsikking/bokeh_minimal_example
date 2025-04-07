@@ -12,12 +12,15 @@ from bokeh.application.handlers.function import FunctionHandler
 from bokeh.server.server import Server
 
 class BokehDoc:
-    def __init__(self, doc):
+    def __init__(self, doc, name='bk_doc', verbose=True):
         import sys # import here to keep sys reference on session destroyed
         self.doc = doc
+        self.name = name
+        self.verbose = verbose
         # Plot:
         def _update_plot():
-            print('updating plot')
+            if self.verbose:
+                print("%s: updating plot"%self.name)
             self.plot.scatter(x=np.random.randint(1, 10),
                               y=np.random.randint(1, 10),
                               size=10)
@@ -26,7 +29,8 @@ class BokehDoc:
         _update_plot() # add some points
         # Stop button:
         def _stop():
-            print('stopping server')
+            if self.verbose:
+                print("%s: stopping server"%self.name)
             sys.exit()
             return None
         self.button = Button(label="Stop", button_type="success")
@@ -37,14 +41,21 @@ class BokehDoc:
         self.doc.add_periodic_callback(_update_plot, 500) # Update every x ms
         # Detect if browser is closed:
         def _session_destroyed(session_context):
-            print('session_destroyed:', session_context.destroyed)
+            if self.verbose:
+                print("%s: session_destroyed = %s"%(
+                    self.name, session_context.destroyed))
             sys.exit()
-            return None        
+            return None
         self.doc.on_session_destroyed(_session_destroyed) # is browser closed?
+
+# -> Edit args and kwargs here for test block:
+def func(doc): # get instance of class WITH args and kwargs
+    bk_doc = BokehDoc(doc, name='bk_test', verbose=True)
+    return bk_doc
 
 if __name__ == '__main__':
     # -> Running from script:
-    bk_app = {'/': Application(FunctionHandler(BokehDoc))} # doc created here
+    bk_app = {'/': Application(FunctionHandler(func))} # doc created here
     server = Server(
         bk_app,
         port=5000, # default 5006
@@ -57,5 +68,5 @@ if __name__ == '__main__':
 else:
     # -> Running with commmand: "bokeh serve --show bokeh_minimal_example.py"
     doc = curdoc()  # create base bokeh doc (container for bokeh models)
-    bokehdoc = BokehDoc(doc) # pass doc into create_doc function
+    bk_doc = func(doc) # pass doc into create_doc function
     # Note .on_session_destroyed callback will fire after ~17 seconds...
