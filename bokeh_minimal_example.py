@@ -1,5 +1,6 @@
 # Imports from the python standard library:
 import numpy as np
+import sys
 
 # Third party imports, installable via pip:
 # -> bokeh graphics and features etc
@@ -12,9 +13,9 @@ from bokeh.application.handlers.function import FunctionHandler
 from bokeh.server.server import Server
 
 class BokehDoc:
-    def __init__(self, doc, name='bk_doc', verbose=True):
-        import sys # import here to keep sys reference on session destroyed
+    def __init__(self, doc, sys, name='bk_doc', verbose=True):
         self.doc = doc
+        self.sys = sys
         self.name = name
         self.verbose = verbose
         # Plot:
@@ -31,7 +32,7 @@ class BokehDoc:
         def _stop():
             if self.verbose:
                 print("%s: stopping server"%self.name)
-            sys.exit()
+            self.sys.exit()
             return None
         self.button = Button(label="Stop", button_type="success")
         self.button.on_click(_stop)
@@ -44,13 +45,13 @@ class BokehDoc:
             if self.verbose:
                 print("%s: session_destroyed = %s"%(
                     self.name, session_context.destroyed))
-            sys.exit()
+            _stop()
             return None
         self.doc.on_session_destroyed(_session_destroyed) # is browser closed?
 
 # -> Edit args and kwargs here for test block:
 def func(doc): # get instance of class WITH args and kwargs
-    bk_doc = BokehDoc(doc, name='bk_test', verbose=True)
+    bk_doc = BokehDoc(doc, sys, name='bk_test', verbose=True)
     return bk_doc
 
 if __name__ == '__main__':
